@@ -173,11 +173,42 @@ class DatabaseController extends Controller
 
         // Construir a estrutura com valores nulos
         foreach ($columns as $column) {
-            $nullStructure[$column] = null;
+            $nullStructure[$column] = "";
         }
 
         // Retornar a estrutura como um array
         return $nullStructure;
+    }
+
+    public function getStructure($tableName){
+        $database = Database::where('uuid',$tableName)->first();
+        if($database){
+            $coluns = $this->getNullStructure($tableName);
+            unset($coluns['id'], $coluns['created_at'], $coluns['updated_at']);
+            return $coluns;
+        }
+        return response()->json(['message'=>'Database não existe'],500);
+    }
+
+    public function insert(Request $request)
+    {
+        $database = Database::where('uuid', $request->database)->first();
+
+        if ($database) {
+            $columns = Schema::getColumnListing($database->uuid);
+            $columns = array_diff($columns, ['id', 'created_at', 'updated_at']);
+            foreach ($columns as $column) {
+                if (!$request->has($column)) {
+                    return response()->json(['message' => "A coluna '{$column}' está faltando na request."], 400);
+                }
+            }
+
+            DB::table($database->uuid)->insert($request->only($columns));
+
+            return response()->json(['message' => 'Sucesso'], 200);
+        }
+
+        return response()->json(['message' => 'Database não existe'], 500);
     }
 
     private function validarUser (Array $pass)
