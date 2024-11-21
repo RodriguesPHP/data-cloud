@@ -141,9 +141,19 @@ class DatabaseController extends Controller
             ];
 
             if ($this->validarUser($pass)) {
+                $search = $request->value;
+                if (isset($request->option) && $request->option == 'botsoluti' && isset($request->value)) {
+                    if (strlen($request->value) >= 13) {
+                        $search = substr($request->value, 2);
+                    }else{
+                        $search = substr($request->value, 2);
+                        $search = substr($search, 0, 2) . '9' . substr($search, 2);
+                    }
+                }
+                return $search;
                 try{
                     $query = DB::table($database->uuid)
-                        ->where($request->column, $request->value)
+                        ->where($request->column, $search)
                         ->first();
                     if($query){
                         $query->error=false;
