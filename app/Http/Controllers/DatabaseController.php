@@ -67,11 +67,11 @@ class DatabaseController extends Controller
 
                 // Adiciona a coluna com o tipo correspondente
                 if ($tipo == 'string') {
-                    $table->string($nome);
+                    $table->string($nome)->nullable();
                 } elseif ($tipo == 'integer') {
-                    $table->integer($nome);
+                    $table->integer($nome)->nullable();
                 } elseif ($tipo == 'text') {
-                    $table->text($nome);
+                    $table->text($nome)->nullable();
                 }
             }
 
@@ -150,7 +150,6 @@ class DatabaseController extends Controller
                         $search = substr($search, 0, 2) . '9' . substr($search, 2);
                     }
                 }
-                return $search;
                 try{
                     $query = DB::table($database->uuid)
                         ->where($request->column, $search)
@@ -210,6 +209,10 @@ class DatabaseController extends Controller
             foreach ($columns as $column) {
                 if (!$request->has($column)) {
                     return response()->json(['message' => "A coluna '{$column}' está faltando na request."], 400);
+                }
+
+                if ($column == ""){
+                    $column = "Não Informado";
                 }
             }
 
